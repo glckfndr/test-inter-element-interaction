@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { Text, StyleSheet } from "react-native";
 import {
   GestureHandlerRootView,
   GestureDetector,
@@ -11,7 +11,7 @@ import Animated, {
   runOnJS,
 } from "react-native-reanimated";
 
-const SecondElement = ({ firstRef }) => {
+const SecondElement = ({ firstRef, triggerAnimation }) => {
   const translationX = useSharedValue(0);
   const translationY = useSharedValue(0);
   const [distance, setDistance] = useState(0);
@@ -23,7 +23,15 @@ const SecondElement = ({ firstRef }) => {
       firstRef.current.measure((fx, fy, fw, fh, fpx, fpy) => {
         const dx = x - fpx;
         const dy = y - fpy;
-        setDistance(Math.sqrt(dx * dx + dy * dy));
+        const newDistance = Math.sqrt(dx * dx + dy * dy);
+        setDistance(newDistance);
+
+        if (newDistance < 100) {
+          // Change 100 to your threshold value
+          runOnJS(triggerAnimation)(true);
+        } else {
+          runOnJS(triggerAnimation)(false);
+        }
       });
     }
   };
@@ -37,7 +45,7 @@ const SecondElement = ({ firstRef }) => {
   };
 
   useEffect(() => {
-    getAbsolutePosition();
+    getAbsolutePosition(); // Trigger position update on mount
   }, []);
 
   const panGesture = Gesture.Pan().onUpdate((event) => {
@@ -62,6 +70,7 @@ const SecondElement = ({ firstRef }) => {
         <Animated.View
           ref={secondRef}
           style={[styles.box, animatedStyle, { backgroundColor: "green" }]}
+          onLayout={getAbsolutePosition} // Ensure position is set on layout
         >
           <Text style={styles.text}>Element 2</Text>
         </Animated.View>

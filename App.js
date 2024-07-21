@@ -1,16 +1,22 @@
 import React, { useRef } from "react";
-import { View, StyleSheet } from "react-native";
-import FirstElement from "./components/FirstElement ";
+import { StyleSheet, View } from "react-native";
+import FirstElement from "./components/FirstElement";
 import SecondElement from "./components/SecondElement";
+
+import Animated, { useSharedValue, withSpring } from "react-native-reanimated";
 
 const App = () => {
   const firstRef = useRef(null);
+  const scale = useSharedValue(1);
+
+  const triggerAnimation = (shouldAnimate) => {
+    scale.value = withSpring(shouldAnimate ? 1.5 : 1);
+  };
 
   return (
     <View style={styles.container}>
-      <FirstElement ref={firstRef} />
-      <SecondElement firstRef={firstRef} />
-      <SecondElement firstRef={firstRef} />
+      <FirstElement ref={firstRef} scale={scale} />
+      <SecondElement firstRef={firstRef} triggerAnimation={triggerAnimation} />
     </View>
   );
 };
@@ -18,8 +24,8 @@ const App = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: "center",
     justifyContent: "center",
+    alignItems: "center",
   },
 });
 
